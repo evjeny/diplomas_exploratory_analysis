@@ -8,57 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 import tqdm
 
-from cache import BaseCache
-
-
-@dataclass
-class Diploma:
-    title: str
-    educational_programme: str
-    year: int
-    abstract: str
-    level: str = ""
-    faculty: str = ""
-
-
-class HSECache(BaseCache):
-    def _diploma_to_json(self, diploma: Diploma) -> dict:
-        return {
-            "title": diploma.title,
-            "educational_programme": diploma.educational_programme,
-            "year": diploma.year,
-            "abstract": diploma.abstract,
-            "level": diploma.level,
-            "faculty": diploma.faculty
-        }
-    
-    def _json_to_diploma(self, diploma_json: dict) -> Diploma:
-        return Diploma(
-            title=diploma_json["title"],
-            educational_programme=diploma_json["educational_programme"],
-            year=diploma_json["year"],
-            abstract=diploma_json["abstract"],
-            level=diploma_json["level"],
-            faculty=diploma_json["faculty"]
-        )
-    
-    def save_state(self, state_name: str, state: list[Diploma]):
-        json_data = [self._diploma_to_json(diploma) for diploma in state]
-        with open(os.path.join(self.folder, state_name), "w+") as f:
-            json.dump(json_data, f)
-    
-    def load_state(self, state_name: str) -> list[Diploma]:
-        with open(os.path.join(self.folder, state_name)) as f:
-            json_data = json.load(f)
-        
-        return [self._json_to_diploma(diploma_json) for diploma_json in json_data]
-    
-    def aggregate_states(self, states: list[list[Diploma]]) -> list[dict]:
-        result = []
-        for diploma_list in states:
-            for diploma in diploma_list:
-                result.append(self._diploma_to_json(diploma))
-        return result
+from base import Diploma
+from cache import DiplomaListCache
 
 
 base_url = "https://www.hse.ru"
@@ -123,7 +74,7 @@ def get_diplomas(page: int) -> list[Diploma]:
 
 def main(cache_folder: str, max_page: int, n_threads: int, output_path: str):
     os.makedirs(cache_folder, exist_ok=True)
-    cache = HSECache(cache_folder)
+    cache = DiplomaListCache(cache_folder)
 
     max_page = find_max_page() if max_page == 0 else max_page
     print(f"Max page: {max_page}")

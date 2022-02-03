@@ -193,3 +193,6 @@ cython_debug/
 # Scraping cache
 _hse_cache/
 parsed_results/
+itmo_nivkr/
+itmo_nivkr_txt/
+_itmo_cache
