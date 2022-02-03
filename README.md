@@ -13,4 +13,12 @@ Packages: `python -m pip install -r requirements.txt`
 Сжатые данные:
 * [GDrive](https://drive.google.com/drive/folders/1jHQWitJkqHN23rJa8OX3vpvJg_osRz13?usp=sharing)
 
-HSE: `python get_diplomas_hse.py --output_path hse_data.json`
+### HSE
+
+1. спарсить данные с [сайта](https://www.hse.ru/edu/vkr/?language=ru): `python get_diplomas_hse.py --output_path hse_data.json`
+
+### ITMO
+
+1. скачать PDF [с описаниями ВКР](https://research.itmo.ru/ru/stat/48/nivkr.htm) и сохранить в папку `itmo_nivkr/` (на случай, если ссылка перестала работать, гуглить "ИТМО сборники НИВКР")
+2. извлечить из PDF тексты (сохраняются в папку `itmo_nivkr_txt`): `python extract_texts_from_pdf.py --pdf_folder itmo_nivkr/ --output_folder itmo_nivkr_txt --n_workers 4`
+3. спарсить данные о ВКР: `python get_diplomas_itmo.py --txts_folder itmo_nivkr_txt/ --output_path itmo_data.json`
