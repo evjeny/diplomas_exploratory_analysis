@@ -151,11 +151,16 @@ def extract_abstract(lines: list[str]) -> str:
     return remove_useless_whitespaces(" ".join(not_empty))
 
 
-def parse_file(content: str) -> list[Diploma]:
+def parse_file(path: str) -> list[Diploma]:
     global year_line_regexp, programme_line_regexp, email_line_regexp
     global udk_line_regexp, s_director_line_regexp, year_regexp
 
+    with open(path) as f:
+        content = f.read()
+
     try:
+        year = extract_year(os.path.basename(path)) # year encoded in filename
+        assert year >= 2000 and year <= 2022, "year is in reasonable range"
         diplomas_level = get_diplomas_level(content)
     except Exception:
         return []
@@ -179,7 +184,6 @@ def parse_file(content: str) -> list[Diploma]:
     result = []
     for group_i, (email_i, year_i, programme_i, udk_i, s_director_i) in enumerate(indices_groups):
         try:
-            year = extract_year(lines[year_i])
             title = extract_title(lines[udk_i+1: s_director_i-1])
             programme = extract_programme(lines[programme_i: email_i])
             faculty = extract_faculty(lines[year_i+1: programme_i])
@@ -216,9 +220,8 @@ def main(cache_folder: str, txts_folder: str, output_path: str):
     print(f"Loaded uncached txts: {len(not_cached_txts)}")
 
     for filename in tqdm.tqdm(not_cached_txts):
-        with open(os.path.join(txts_folder, filename)) as f:
-            content = f.read()
-        cache.save_state(filename, parse_file(content))
+        file_diplomas = parse_file(os.path.join(txts_folder, filename))
+        cache.save_state(filename, file_diplomas)
     
     with open(output_path, "w+") as f:
         json.dump(cache.load(), f)
